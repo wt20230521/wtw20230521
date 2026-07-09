@@ -70,14 +70,16 @@ https://raw.githubusercontent.com/wt20230521/wtw20230521/main/ips-v6.txt
 | 2026-07-09 | 首次上传，从 Cloudflare 官方源获取最新 IP 地址段 |
 
 ---
-## 📡 实时数据源（推荐使用）
+## 📡 实时优选IP数据源
 
-以下链接每小时自动更新，包含经过测速筛选的优选IP地址，可直接用于测评工具：
+以下链接由第三方项目维护，每小时自动更新：
 
 | 类型 | 链接 |
 |------|------|
 | 高速优选IP（主用） | https://ips.gaoji.uk/best_ips.txt |
 | 高速优选IP（备用） | https://raw.githubusercontent.com/svip-s/cloudflare_ip/refs/heads/main/best_ips.txt |
+
+> 本仓库的 `ips-v4.txt` 和 `ips-v6.txt` 为官方原始CIDR网段，供备用或自定义测评使用。
 ## ⚠️ 注意事项
 
 1. 本仓库仅存储静态 IP 数据，实际使用时请以官方最新数据为准。
