@@ -59,9 +59,10 @@
 ```bash
 # IPv4 地址列表
 https://raw.githubusercontent.com/wt20230521/wtw20230521/main/ips-v4.txt
-
+https://gh-proxy.org/https://raw.githubusercontent.com/wt20230521/wtw20230521/main/ips-v4.txt
 # IPv6 地址列表
 https://raw.githubusercontent.com/wt20230521/wtw20230521/main/ips-v6.txt
+https://gh-proxy.org/https://raw.githubusercontent.com/wt20230521/wtw20230521/main/ips-v6.txt
 ```
 
 ---
