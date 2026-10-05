@@ -63,6 +63,9 @@ https://gh-proxy.org/https://raw.githubusercontent.com/wt20230521/wtw20230521/ma
 # IPv6 地址列表
 https://raw.githubusercontent.com/wt20230521/wtw20230521/main/ips-v6.txt
 https://gh-proxy.org/https://raw.githubusercontent.com/wt20230521/wtw20230521/main/ips-v6.txt
+# best-ips-cf.txt 地址列表
+https://raw.githubusercontent.com/wt20230521/wtw20230521/main/best-ips-cf.txt
+https://gh-proxy.org/https://raw.githubusercontent.com/wt20230521/wtw20230521/main/best-ips-cf.txt
 ```
 
 ---
