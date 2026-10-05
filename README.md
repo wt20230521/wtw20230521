@@ -6,24 +6,28 @@
 
 ## 📦 文件说明
 
-| 文件名 | 内容 | 用途 |
-|--------|------|------|
-| `ips-v4.txt` | Cloudflare IPv4 地址段（CIDR 格式） | 供测评工具从网段中生成候选 IP |
-| `ips-v6.txt` | Cloudflare IPv6 地址段（CIDR 格式） | 供测评工具从网段中生成候选 IP |
+| 文件名 | 行数 | 内容 | 用途 | 能直接填面板「自定义优选」吗 |
+|--------|------|------|------|------------------------------|
+| `ips-v4.txt` | 5956 | Cloudflare IPv4 段，统一 `/24` | 给测评工具当**候选池原料** | ❌ 不行（会被截断） |
+| `ips-v6.txt` | 448 | Cloudflare IPv6 段，统一 `/48`（抽样） | 同上 | ❌ 不行（会产出坏链接） |
+| `best-ips-cf.txt` | 300 | 具体 IPv4 **主机 IP:端口** | **直接粘进面板「自定义优选」** | ✅ 可以 |
 
-> ⚠️ **注意**：Cloudflare 官方公布的网段包含多种 CIDR 前缀（如 `/22`、`/20`、`/32`、`/48` 等），并非固定长度。
+> ⚠️ **注意 1**：`ips-v4.txt` / `ips-v6.txt` 是**网段（CIDR）**，不是能连的主机地址。它们的作用是让测评工具从中展开出候选 IP，**不可以直接当优选列表用**——详见下方「常见误区」。
+>
+> ⚠️ **注意 2**：官方公布的原始网段是**多种前缀混合**的（`/13`、`/17`、`/18`、`/20`、`/22` for IPv4；`/29`、`/32` for IPv6）。本仓库为了方便测评工具批量展开，**已统一归一化**：IPv4 全部展开为 `/24`，IPv6 全部取 `/48`。覆盖地址空间与官方完全一致。
 
 ---
 
 ## 🔗 数据来源
 
-两个文件均来自 Cloudflare 官方公开 IP 列表：
+三个文件均源自 Cloudflare 官方公开 IP 列表：
 
 - **IPv4**：https://www.cloudflare.com/ips-v4
 - **IPv6**：https://www.cloudflare.com/ips-v6
+- **官方 API**：https://api.cloudflare.com/client/v4/ips
 - **官方文档**：https://developers.cloudflare.com/fundamentals/concepts/cloudflare-ip-addresses/
 
-> ⚠️ **注意**：Cloudflare 会不定期更新 IP 地址段，建议定期检查并更新本仓库的文件内容，以保证测评数据的准确性。
+> ⚠️ **注意**：Cloudflare 会不定期增删 IP 段，建议**每季度核对一次官方源**。仅增量增删会导致候选池残缺——2026-10-05 那次校正就发现旧版 `ips-v4.txt`（3584 行）漏了官方 **15 个段中的 11 个**。
 
 ---
 
@@ -33,7 +37,7 @@
 
 1. 读取本仓库的 `ips-v4.txt` 和 `ips-v6.txt` 中的 IP 网段
 2. 从网段中生成候选 IP 地址
-3. 与用户指定的端口（如 `443`、`8443`、`2053`、`2083`、`2087`、`2096` 等）组合成 `IP:端口` 格式
+3. 与用户指定的端口组合成 `IP:端口` 格式
 4. 进行连通性和延迟测评
 5. 筛选并输出低延迟的优质 IP
 
@@ -50,23 +54,78 @@
 
 > 💡 用户也可以在工具中自定义添加更多端口进行测试。
 
+### `best-ips-cf.txt` 的来源
+
+这 300 条**不是测速结果**，而是从上述 15 个官方 IPv4 段里按段均匀抽样出的**具体主机 IP + 端口**，特点是：
+
+- 每条都写成 `IP:端口`（**必须带端口**，否则下游会回落到随机端口，节点数会膨胀）
+- 全部避开 `.0`（网络号）和 `.255`（广播号）
+- **不带 `#地区` 后缀**——Cloudflare 是 anycast，同一个 IP 在不同网络里落点不同，写 `HK`/`US` 就是假标注
+
+它的定位是**零第三方兜底列表**（保证不断供），不是速度最优列表。想要速度，请用它当起点，跑完测评后用你自己的低延迟结果替换它。
+
 ---
 
 ## 📥 获取文件的 Raw 链接
 
-本仓库文件可通过以下 Raw 链接直接下载或引用：
-
 ```bash
-# IPv4 地址列表
+# IPv4 地址段（候选池 · 5956 行 /24）
 https://raw.githubusercontent.com/wt20230521/wtw20230521/main/ips-v4.txt
 https://gh-proxy.org/https://raw.githubusercontent.com/wt20230521/wtw20230521/main/ips-v4.txt
-# IPv6 地址列表
+
+# IPv6 地址段（候选池 · 448 行 /48）
 https://raw.githubusercontent.com/wt20230521/wtw20230521/main/ips-v6.txt
 https://gh-proxy.org/https://raw.githubusercontent.com/wt20230521/wtw20230521/main/ips-v6.txt
-# best-ips-cf.txt 地址列表
+
+# 可直接用的主机 IP 列表（300 行 IP:端口）
 https://raw.githubusercontent.com/wt20230521/wtw20230521/main/best-ips-cf.txt
 https://gh-proxy.org/https://raw.githubusercontent.com/wt20230521/wtw20230521/main/best-ips-cf.txt
 ```
+
+> ⚠️ `gh-proxy.org` 是第三方加速镜像，**仅作为 raw 访问不畅时的备用**。它有可能返回过期内容，主用请认 `raw.githubusercontent.com`。
+
+---
+
+## 🧩 玻璃面板（Glass Panel）对接说明
+
+面板的「模式选择 → 自定义优选」支持填 URL 或直接粘贴 IP 列表，多条源用回车分隔。
+
+**推荐用法**：只填这一条即可 ——
+
+```
+https://raw.githubusercontent.com/wt20230521/wtw20230521/main/best-ips-cf.txt
+```
+
+已实测（2026-10-05，离线驱动已部署代码 + 真实上游 176 条 vless 节点）：
+
+| 检查项 | 结果 |
+|--------|------|
+| 解析到的优选条目数 | 300 |
+| 输出节点数 | 300（一一对应，无重复） |
+| 坏链接 | 0 |
+| 上游自带的 `path=/proxyip=...` | 全部保留 ✅ |
+| 上游 `host` / `sni` / `fragment` | 全部未被改写 ✅ |
+
+### 常见误区
+
+**① 别把 `ips-v4.txt` 直接填进面板**
+面板有 `SUB_MAX_NODES = 300` 上限，5956 条 CIDR 会被静默截断成前 300 条——而这些是 `.0` 网络号且未测速，客户端基本没法用。
+
+**② 别把 `ips-v6.txt` 直接填进面板**
+面板当前版本存在已知缺陷：重写节点时**没有给 IPv6 补回方括号**，会吐出：
+
+```
+vless://uuid@2400:cb00:::443?security=tls&...
+                 ^^^^^^^^^^^^ 客户端无法解析
+```
+
+在全自选 link 的情况下，**自定义优选请只用 IPv4**。（透传模式不受影响，因为上游自己带方括号。）
+
+**③ `best-ips-cf.txt` 请保持 ≤ 300 行**
+超过部分会被面板静默丢弃。要增加节点请先做减法：跑测速，删掉慢的，再补新的。
+
+**④ 行首 `#` 是注释**
+面板会自动跳过 `#` 开头的行，可以安全地在文件里写说明。
 
 ---
 
@@ -80,6 +139,8 @@ https://gh-proxy.org/https://raw.githubusercontent.com/wt20230521/wtw20230521/ma
 | 高速优选 IP（备用） | https://raw.githubusercontent.com/svip-s/cloudflare_ip/refs/heads/main/best_ips.txt |
 
 > ⚠️ 这些数据源为社区贡献，本仓库不对其准确性和可用性负责。
+>
+> 💡 **建议的借用姿势：只抄数据，不交控制权。** 把它们里面的 IP 复制出来喂给自己的测速工具或自己的列表，**不要**把自己的 UUID / 订阅链接交给别人的在线生成器（等于把节点配置和访问行为都暴露给对方）。
 
 ---
 
@@ -88,10 +149,12 @@ https://gh-proxy.org/https://raw.githubusercontent.com/wt20230521/wtw20230521/ma
 | 日期 | 更新内容 | 数据来源校验 |
 |------|----------|-------------|
 | 2026-07-09 | 首次上传，同步 Cloudflare 官方最新 IP 段 | [ips-v4](https://www.cloudflare.com/ips-v4) / [ips-v6](https://www.cloudflare.com/ips-v6) |
+| 2026-10-05 | ① 按官方最新 API 校正 `ips-v4.txt`；发现旧版仅覆盖 15 个官方段中的 4 个（5946→**5956** 条 /24，11 个整段缺失已补全）<br>② `ips-v6.txt` 重生成，抽样为 **448** 条 /48（原 633 条抽样口径不同，且有越界段）<br>③ 新增 `best-ips-cf.txt`（**300** 条具体主机 IP:端口，可直接给面板用） | [ips-v4](https://www.cloudflare.com/ips-v4) / [ips-v6](https://www.cloudflare.com/ips-v6) / [API](https://api.cloudflare.com/client/v4/ips) |
 
 ### 更新计划
+
 - 检查频率：建议每季度核对一次官方源
-- 上次官方源校验时间：2026-07-09
+- 上次官方源校验时间：**2026-10-05**
 
 ---
 
@@ -99,8 +162,9 @@ https://gh-proxy.org/https://raw.githubusercontent.com/wt20230521/wtw20230521/ma
 
 1. 本仓库仅存储静态 IP 数据，实际使用时请以官方最新数据为准。
 2. IP 地址段会随时间变化，建议设置定期更新提醒（如每季度检查一次）。
-3. 本数据仅供学习研究及网络测试用途，请遵守当地法律法规。
+3. `ips-*.txt` 是候选池，`best-ips-cf.txt` 才是成品列表，两者不要混用。
+4. 本数据仅供学习研究及网络测试用途，请遵守当地法律法规。
 
 ---
 
-<p align="right">最后更新时间：2026年7月9日</p>
+<p align="right">最后更新时间：2026年10月5日</p>
